@@ -1,0 +1,143 @@
+---
+title: "Data cleaning"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(here)
+
+# Read in data
+# Sampling site descriptions
+sites <- read_csv(here("data", "knb-lter-cap.562.10", "300_sites_1.csv"))
+
+# Absence or presence of mycorrhiza species
+species_occurrences <- read_csv(here("data", "knb-lter-cap.562.10", "300_species_occurrance_1.csv"))
+
+# Colonization of plant roots
+colonization <- read_csv(here("data", "knb-lter-cap.562.10", "300_summary_data_1.csv"))
+```
+```{r}
+# View data types
+glimpse(sites)
+```
+I only need one primary key column in this data frame to connect to my other dataframes, site_id. Therefore, I am going to drop the generated ID column. 
+
+It looks like all of the data types are as expected (character for site_id and site_description, datetime for sampled_on, and double for lat and long). 
+
+```{r}
+sites_clean <- sites %>% 
+  select(-ID)
+```
+
+Next, we have species occurrences, which is the absence or presence of mycorrhiza species. This data frame has a lot of information, including a plant_id and a lot of information about each plant before it includes the absence or presence of these species. Based on this, I want to normalize the data further and create an intermediary table for just plants. 
+
+This table will include a unique ID as the primary key (the existing plant_id is not unique, it repeats 1-10 for each site and plant type- for each site there are 10 succulent plants and 10 woody plants) to associate that plant with the other tables rows. 
+
+```{r}
+glimpse(species_occurrences)
+```
+```{r}
+species_occurrences <- species_occurrences %>% 
+  # add unique primary key 
+   mutate(id = row_number()) %>% 
+   relocate(id) %>% 
+  # rename plant_id and id column 
+  rename(plant_number = plant_id) %>% 
+  rename(plant_id = id)
+```
+
+
+
+```{r}
+# Select rows for intermediate table
+plants_clean <- species_occurrences %>% 
+  select(c(plant_id, site_id, plant_number, plant_type, plant_species)) 
+```
+
+Now that the intermediary plant table has been created, we can check the types.
+
+```{r}
+glimpse(plants_clean)
+```
+All of the types are as expected. 
+
+Next, we can edit the species_occurrences table and replace the plant info with just the plant_id. 
+
+```{r}
+species_occurrences <- species_occurrences %>% 
+  select(-c(ID, site_id, plant_number, plant_type, plant_species))
+```
+
+Now, we want to pivot the presence/absence columns from wide to long format, with a mychorrhiza_species column and a presence column (0/1).
+
+```{r}
+species_occurrences_clean <- species_occurrences %>% 
+  pivot_longer(
+    cols = acaulospora_delicata:acaulospora_mellea,
+         names_to = "mycorrhiza_species",
+         values_to = "present")
+```
+
+```{r}
+glimpse(species_occurrences_clean)
+```
+The types look good!
+
+Let's look at colonization 
+```{r}
+glimpse(colonization) 
+```
+We can similarly replace the plant info columns with a plant id, and we don't really need the id. 
+
+```{r}
+colonization <- colonization %>%
+  # rename same columns to match for joining 
+  rename(plant_number = plant_id) %>%
+  # left join to match correct plant_id to row
+  left_join(plants_clean, by = c("site_id", "plant_number", "plant_type", "plant_species")) %>%
+  # remove redundant columns
+  select(-c(ID, site_id, plant_number, plant_type, plant_species)) %>% 
+  # move plant_id to the front 
+  relocate(plant_id)
+```
+
+```{r}
+glimpse(colonization)
+```
+The types for each column in our cleaned colonization df match the metadata!
+There are a few rows with all NA's at the bottom of this data set, so we can remove them. 
+
+```{r}
+# remove rows with all NAs
+colonization_clean <- colonization %>%
+  filter(!is.na(plant_id)) %>% 
+  # remove row where all other columns are NA
+  filter(!if_all(-plant_id, is.na)) 
+```
+
+Now that the data is cleaned, the types of each column are checked, and normalized, we can write them to new csv files for ingestion into duckdb. 
+
+```{r}
+# file names
+datadir_processed <- file.path("processed_data")
+
+# check if the folder exists
+dir.create(datadir_processed, showWarnings = FALSE)
+
+# write the files
+write_csv(sites_clean, file.path(datadir_processed, "sites_clean.csv"))
+
+write_csv(plants_clean, file.path(datadir_processed, "plants_clean.csv"))
+
+write_csv(species_occurrences_clean, file.path(datadir_processed, "species_occurrences_clean.csv"))
+
+write_csv(colonization_clean, file.path(datadir_processed, "colonization_clean.csv"), na = "")
+```
+
+# clean data
+# write to csv to root directory, series of tables
+# upload csvs to repo
+# create database folder
+# open csv in terminal 
+# Create database- D duckdb newdatabase.db
