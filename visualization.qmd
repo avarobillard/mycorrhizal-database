@@ -1,0 +1,84 @@
+---
+title: "visualization"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(dbplyr)
+library(duckdb)
+library(showtext)
+```
+
+## Connect to database
+```{r}
+conn <- DBI::dbConnect(duckdb::duckdb(),
+                       dbdir = "mycorrhizal.db")
+
+DBI::dbListTables(conn)
+```
+
+## Reference tables
+```{r}
+species_occurrences_db <- tbl(conn, "species_occurrences")
+species_occurrences_db
+
+plants_db <- tbl(conn, "plants")
+plants_db
+
+sites_db <- tbl(conn, "sites")
+sites_db
+```
+
+## Query
+```{r}
+result <- sites_db %>% 
+  inner_join(plants_db, by = "site_id") %>% 
+  inner_join(species_occurrences_db,by = "plant_id") %>% 
+  filter(present == 1) %>% 
+  group_by(site_description) %>% 
+  summarize(diversity = n_distinct(mycorrhiza_species)) %>% 
+  arrange(desc(diversity)) %>% 
+  collect()
+```
+
+## Visualize results
+```{r}
+# Graphics
+font_add_google(name = "Sarala", family = "sarala")
+site_colors <- c("Urban desert preserve" = "#5d634a", "Sonoran desert" = "#96882b")
+
+showtext_auto(enable = TRUE)
+
+result %>% 
+  mutate(region = ifelse(site_description %in% c("South Mountain Park", "North Mountain Preserve"), "Urban desert preserve", "Sonoran desert")) %>%
+  ggplot(aes(x=reorder(site_description, diversity), y=diversity, fill = region)) +
+  geom_col() +
+  scale_fill_manual(values = site_colors,
+                    name = NULL) +
+  labs(
+    x = "Site",
+    y = "Mycorrhizal species diversity",
+    title = "Mycorrhizal species diversity is higher in the Sonoran\ndesert than in surrounding urban desert preserves",
+    subtitle = "Decreases in Mycorrhizal diversity observed in woody and succulent plants\nat urban preserves may reduce the ability of preserves to sustain biodiversity\nin central Arizona."
+  ) +
+  coord_flip() +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 8, family = "sarala"),
+        plot.title = element_text(size = 14.5, family = "sarala"),
+        plot.subtitle = element_text(size = 9, "sarala"),
+        legend.position = "bottom",
+        axis.title.y = element_blank(),
+        axis.title = element_text(size = 9, family = "sarala"))
+```
+
+## Close connection
+```{r}
+DBI::dbDisconnect(conn, shutdown = TRUE)
+```
+
+```{r}
+writeLines(capture.output(sessionInfo()), "requirements.txt")
+```
+

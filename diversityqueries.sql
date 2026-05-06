@@ -74,10 +74,9 @@ CSV **HEADER**;
 
 -- Query: Is mychorrhizal species diversity higher in plants located in urban desert preserve sites or Sonoran desert sites?
 
-SELECT site_description, COUNT(present) AS diversity FROM
-  sites s 
-  JOIN plants p USING(site_id)
-  JOIN species_occurrences o USING(plant_id)
+SELECT site_description, COUNT(DISTINCT mycorrhiza_species) AS diversity FROM sites 
+  JOIN plants USING(site_id)
+  JOIN species_occurrences USING(plant_id)
   WHERE present = 1
   GROUP BY site_description
   ORDER BY diversity Desc;

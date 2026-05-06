@@ -120,24 +120,17 @@ Now that the data is cleaned, the types of each column are checked, and normaliz
 
 ```{r}
 # file names
-datadir_processed <- file.path("processed_data")
+datadir_clean <- file.path("clean_data")
 
 # check if the folder exists
-dir.create(datadir_processed, showWarnings = FALSE)
+dir.create(datadir_clean, showWarnings = FALSE)
 
 # write the files
-write_csv(sites_clean, file.path(datadir_processed, "sites_clean.csv"))
+write_csv(sites_clean, file.path(datadir_clean, "sites_clean.csv"))
 
-write_csv(plants_clean, file.path(datadir_processed, "plants_clean.csv"))
+write_csv(plants_clean, file.path(datadir_clean, "plants_clean.csv"))
 
-write_csv(species_occurrences_clean, file.path(datadir_processed, "species_occurrences_clean.csv"))
+write_csv(species_occurrences_clean, file.path(datadir_clean, "species_occurrences_clean.csv"))
 
-write_csv(colonization_clean, file.path(datadir_processed, "colonization_clean.csv"), na = "")
+write_csv(colonization_clean, file.path(datadir_clean, "colonization_clean.csv"), na = "")
 ```
-
-# clean data
-# write to csv to root directory, series of tables
-# upload csvs to repo
-# create database folder
-# open csv in terminal 
-# Create database- D duckdb newdatabase.db
