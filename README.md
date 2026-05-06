@@ -3,11 +3,11 @@ exploring mycorrhizal fungal diveristy among plants in urban desert preserves an
 
 Author: Ava Robillard
 
-This repository contains code to create a database and explore mycorrhizal fungal diveristy among plants in urban desert preserves and surrounding deserts in central Arizona.
+This repository contains code to create a database and explore mycorrhizal fungal diversity among plants in urban desert preserves and surrounding deserts in central Arizona.
 
-Lab project for EDS 213: Databases and Data Management
+Mycorrhizal fungi are key for desert plants as they form a symbiotic relationship and help them absorb moisture and nutrients from an arid soil. 
 
-<img src="blogimages/infographicfinal.png" width="70%"/>
+<img src="images/mushrooms.png" width="70%"/>
 
 ## Repository Structure
 
@@ -32,11 +32,12 @@ mycorrhizal-database
 
 ## Data
 
-The cleaned data is located within `clean_data`, but the full data can be downloaded from this link: https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-cap.562.10 
-
+The cleaned data used for the analysis and visualization is located within `clean_data`.  The full data can be downloaded from this link: https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-cap.562.10 and placed within a `data` folder at the project root as described by the repository structure diagram if you would like to run the data cleaning script on your own as well.
 
 ## References
 
 This assignment was created as a part of EDS 213: Databases & Data Management, taught by Julien Brun and Greg Janée.
 
 Stutz, J. and A. Ontiveros. 2013. Arbuscular mycorrhizal fungal diversity and functioning in urban desert preserves and surrounding deserts in the central Arizona ver 10. Environmental Data Initiative. https://doi.org/10.6073/pasta/b2615dd0ed796e899446e46b75c56643 (Accessed 2026-05-06).
+
+README image: Mycorrhizal Mushrooms. Photo 2018 © Robin Kobaly 
