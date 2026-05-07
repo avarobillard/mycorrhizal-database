@@ -22,7 +22,7 @@ mycorrhizal-database
 ├── data                                 # Raw data- input of data cleaning script
 │ └── knb-lter-cap.562.10
 ├── datacleaning.qmd                     # Data cleaning script
-├── diversityqueries.sql                 # Query 
+├── diversityqueries.sql                 # Query and table definitions
 ├── mycorrhizal-database.Rproj
 ├── mycorrhizal.db                       # database
 ├── README.md         
@@ -30,9 +30,11 @@ mycorrhizal-database
 └── visualization.qmd                    # Data analysis and visualization
 ```
 
-## Data
+Run all SQL scripts from the project root (mycorrhizal-database/).
 
-The cleaned data used for the analysis and visualization is located within `clean_data`.  The full data can be downloaded from this link: https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-cap.562.10 and placed within a `data` folder at the project root as described by the repository structure diagram if you would like to run the data cleaning script on your own as well.
+## Data access
+
+The cleaned data used for the analysis and visualization is located within `clean_data`.  The full data can be downloaded from this link: https://doi.org/10.6073/pasta/b2615dd0ed796e899446e46b75c56643 and placed within a `data` folder at the project root as described by the repository structure diagram if you would like to run the data cleaning script on your own as well.
 
 ## References
 

@@ -1,4 +1,6 @@
--- Create sites table
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                             Create sites table                           ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CREATE TABLE sites (
 site_id TEXT PRIMARY KEY,
 site_description TEXT,
@@ -9,13 +11,15 @@ longitude REAL NOT NULL CHECK (longitude BETWEEN -180 AND 180)
 
 **COPY sites** (site_id, site_description, sampled_on, latitude, longitude)
 
-**FROM** '/Users/ava/Documents/MEDS/EDS-213/mycorrhizal-database/processed_data/sites_clean.csv'
+**FROM** 'clean_data/sites_clean.csv'
 
 DELIMITER ','
 
 CSV **HEADER**;
 
--- Create plants table
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                            Create plants table                           ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CREATE TABLE plants (
 plant_id INTEGER PRIMARY KEY,
 site_id TEXT NOT NULL REFERENCES sites(site_id),
@@ -26,13 +30,15 @@ plant_species TEXT NOT NULL
 
 **COPY** plants
 
-**FROM** '/Users/ava/Documents/MEDS/EDS-213/mycorrhizal-database/processed_data/plants_clean.csv'
+**FROM** 'clean_data/plants_clean.csv'
 
 DELIMITER ','
 
 CSV **HEADER**;
 
--- Create species_occurrences table
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                      Create species_occurrences table                    ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CREATE TABLE species_occurrences (
 plant_id INTEGER NOT NULL REFERENCES plants(plant_id),
 mycorrhiza_species TEXT NOT NULL,
@@ -43,13 +49,15 @@ PRIMARY KEY (plant_id, mycorrhiza_species)
 
 **COPY species_occurrences**
 
-**FROM** '/Users/ava/Documents/MEDS/EDS-213/mycorrhizal-database/processed_data/species_occurrences_clean.csv'
+**FROM** 'clean_data/species_occurrences_clean.csv'
 
 DELIMITER ','
 
 CSV **HEADER**;
 
--- Create colonization table
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                          Create colonization table                       ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CREATE TABLE colonization (
 plant_id INTEGER NOT NULL REFERENCES plants(plant_id),
 no_amf INTEGER,
@@ -66,13 +74,24 @@ other_fungi INTEGER
 
 **COPY colonization**
 
-**FROM** '/Users/ava/Documents/MEDS/EDS-213/mycorrhizal-database/processed_data/colonization_clean.csv'
+**FROM** 'clean_data/colonization_clean.csv'
 
 DELIMITER ','
 
 CSV **HEADER**;
 
--- Query: Is mychorrhizal species diversity higher in plants located in urban desert preserve sites or Sonoran desert sites?
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                    Query                                 ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-- Is mychorrhizal species diversity higher in plants located in urban desert preserve sites or Sonoran desert sites?
+
+-- Join plants and species occurrences tables to associate information about each plant's species diversity with the site. 
+-- Filter to only rows where mycorrhizal species are present
+-- Group by site description and count the distinct mycorrhizal species in each to understand how many unique species there are in each site
+
+-- Order results in descending order
+-- The result contains the site descriptions with a count of total species diversity from all plants in that site.
 
 SELECT site_description, COUNT(DISTINCT mycorrhiza_species) AS diversity FROM sites 
   JOIN plants USING(site_id)
@@ -80,3 +99,4 @@ SELECT site_description, COUNT(DISTINCT mycorrhiza_species) AS diversity FROM si
   WHERE present = 1
   GROUP BY site_description
   ORDER BY diversity Desc;
+  

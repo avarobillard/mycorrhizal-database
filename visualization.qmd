@@ -1,9 +1,11 @@
 ---
-title: "visualization"
+title: "Data Analysis and Visualization"
 format: html
 ---
 
 ```{r}
+#| message: FALSE
+# Load libraries
 library(tidyverse)
 library(DBI)
 library(dbplyr)
@@ -13,6 +15,7 @@ library(showtext)
 
 ## Connect to database
 ```{r}
+# Connect to database at project root
 conn <- DBI::dbConnect(duckdb::duckdb(),
                        dbdir = "mycorrhizal.db")
 
@@ -21,36 +24,52 @@ DBI::dbListTables(conn)
 
 ## Reference tables
 ```{r}
+# Species occurrence table
 species_occurrences_db <- tbl(conn, "species_occurrences")
 species_occurrences_db
 
+# Plants table
 plants_db <- tbl(conn, "plants")
 plants_db
 
+# Sites table
 sites_db <- tbl(conn, "sites")
 sites_db
 ```
 
 ## Query
+
+Is mycorrhizal species diversity higher in plants located in urban desert preserve sites or Sonoran desert sites?
+
+The result of this query contains the site descriptions with a count of total species diversity from all plants in that site.
+
 ```{r}
+# Query mycorrhizal species diversity by site, filtering to present species only
 result <- sites_db %>% 
+  # Join plants and species occurrences tables
   inner_join(plants_db, by = "site_id") %>% 
   inner_join(species_occurrences_db,by = "plant_id") %>% 
+  # Filter to only rows where mycorrhizal species are present
   filter(present == 1) %>% 
+  # Group by site description
   group_by(site_description) %>% 
+  # Count the distinct mycorrhizal species in each site
   summarize(diversity = n_distinct(mycorrhiza_species)) %>% 
+  # Order results in descending order
   arrange(desc(diversity)) %>% 
+  # Pull data into R
   collect()
 ```
 
 ## Visualize results
+
 ```{r}
 # Graphics
 font_add_google(name = "Sarala", family = "sarala")
 site_colors <- c("Urban desert preserve" = "#5d634a", "Sonoran desert" = "#96882b")
-
 showtext_auto(enable = TRUE)
 
+# Plot diversity by site, colored by region (urban preserve vs Sonoran desert)
 result %>% 
   mutate(region = ifelse(site_description %in% c("South Mountain Park", "North Mountain Preserve"), "Urban desert preserve", "Sonoran desert")) %>%
   ggplot(aes(x=reorder(site_description, diversity), y=diversity, fill = region)) +
@@ -66,19 +85,15 @@ result %>%
   coord_flip() +
   theme_minimal() +
   theme(axis.text = element_text(size = 8, family = "sarala"),
-        plot.title = element_text(size = 14.5, family = "sarala"),
-        plot.subtitle = element_text(size = 9, "sarala"),
+        plot.title = element_text(size = 14, family = "sarala"),
+        plot.subtitle = element_text(size = 9, family = "sarala"),
         legend.position = "bottom",
         axis.title.y = element_blank(),
         axis.title = element_text(size = 9, family = "sarala"))
 ```
 
 ## Close connection
+
 ```{r}
 DBI::dbDisconnect(conn, shutdown = TRUE)
 ```
-
-```{r}
-writeLines(capture.output(sessionInfo()), "requirements.txt")
-```
-
