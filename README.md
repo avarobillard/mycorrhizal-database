@@ -6,7 +6,7 @@ This repository contains code to create a database and explore mycorrhizal funga
 
 Mycorrhizal fungi are soil fungi that form a symbiotic relationship with plant roots. They extend root systems via thread-like hyphae, drastically increasing water and nutrient uptake which is especially important in arid desert environments.
 
-<img src="images/mushrooms.png" width="70%"/> <img src="images/dataviz.png" width="70%"/>
+<img src="images/mushrooms.png" width="70%"/> 
 
 ## Repository Structure
 
@@ -29,13 +29,15 @@ mycorrhizal-database
 └── visualization.qmd                    # Data analysis and visualization
 ```
 
+Ensure that the specifications in `requirements.txt` are met. Run all SQL scripts from the project root (mycorrhizal-database/).
+
 This repository contains a workflow of:
 
 1)  A cleaning script for raw data (`datacleaning.qmd`).
 2)  Table definitions for ingesting the clean data into a database (`diversityqueries.sql`).
 3)  A data analysis and visualization script to create a plot of mycorrhizal fungi species diversity by desert site (`visualization.qmd`).
 
-Ensure that the specifications in `requirements.txt` are met. Run all SQL scripts from the project root (mycorrhizal-database/).
+<img src="images/dataviz.png" width="70%"/>
 
 ## Data access
 
